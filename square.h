@@ -31,7 +31,7 @@ private:
 public:
     //constructor
     Square();
-    Square(point center);
+    Square(point center, fill color);
 
     void draw() const;
 

@@ -20,8 +20,10 @@ bool foodCollides;
 bool moved = false;
 //set initial direction as down
 int direction = DOWN;
-//object for the snake
+//object for the snake and egg
 vector<Square> snake;
+vector<Square> egg;
+
 point eggCenter; //center of the egg
 
 //will hold the width and height of the window
@@ -66,25 +68,120 @@ void makeFood(){
             if(!foodCollides){
                 eggCenter = tempCenter;
                 needFood = false;
+                egg.push_back(Square(eggCenter, {1,1,1}));
             }
 
 
         }
     }
 
+
 }
 
 void moveSnake(int d){
     direction = d;
-
+    point temp, next, back;
     switch(direction){
-//        case UP:
-//
-//        case DOWN:
-//
-//        case RIGHT:
-//
-//        case LEFT:
+        case UP:
+            if(snake[0].isOverlapping(eggCenter)) {
+                egg.clear();
+                needFood = true;
+                makeFood();
+                temp = snake[0].getCenter();
+                snake[0].move(0, -3);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+                temp = snake[-1].getCenter();
+                moveSnake(UP);
+                snake.push_back(Square(temp, {0,0,1}));
+            }
+            else {
+                needFood = false;
+                temp = snake[0].getCenter();
+                snake[0].move(-3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+
+            }
+        case DOWN:
+            if(snake[0].isOverlapping(eggCenter)) {
+                egg.clear();
+                needFood = true;
+                makeFood();
+                temp = snake[0].getCenter();
+                snake[0].move(0, 3);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+                temp = snake[-1].getCenter();
+                moveSnake(DOWN);
+                snake.push_back(Square(temp, {0,0,1}));
+            }
+            else {
+                needFood = false;
+                temp = snake[0].getCenter();
+                snake[0].move(-3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+
+            }
+        case RIGHT:
+            if(snake[0].isOverlapping(eggCenter)) {
+                egg.clear();
+                needFood = true;
+                makeFood();
+                temp = snake[0].getCenter();
+                snake[0].move(3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+                temp = snake[-1].getCenter();
+                moveSnake(RIGHT);
+                snake.push_back(Square(temp, {0,0,1}));
+            }
+            else {
+                needFood = false;
+                temp = snake[0].getCenter();
+                snake[0].move(-3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+
+            }
+        case LEFT:
+            if(snake[0].isOverlapping(eggCenter)) {
+                egg.clear();
+                needFood = true;
+                makeFood();
+                temp = snake[0].getCenter();
+                snake[0].move(-3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+                temp = snake[-1].getCenter();
+                moveSnake(LEFT);
+                snake.push_back(Square(temp, {0,0,1}));
+            }
+            else {
+                needFood = false;
+                temp = snake[0].getCenter();
+                snake[0].move(-3, 0);
+                for (int i = 1; i < snake.size(); ++i) {
+                    next = snake[i].getCenter();
+                    snake[i].setCenter(next);
+                }
+
+            }
     }
 }
 
@@ -123,10 +220,10 @@ void display() {
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT, GL_FILL);
 
-    for (int i = 0; i < snake.size(); ++i){
-        snake[i].draw();
-    }
-    makeFood();
+//    for (int i = 0; i < snake.size(); ++i){
+//        snake[i].draw();
+//    }
+//    makeFood();
 
 
     glFlush();  // Render now
@@ -169,10 +266,11 @@ int main(int argc, char** argv) {
     glutInitWindowSize((int)width, (int)height);
     glutInitWindowPosition(100, 200); // Position the window's initial top-left corner
     /* create the window and store the handle to it */
-    int wd = glutCreateWindow("3D Graphics!" /* title */ );
+    int wd = glutCreateWindow("Snake Game" /* title */ );
 
     // Register callback handler for window re-paint event
     glutDisplayFunc(display);
+    //glutKeyboardFunc(kbd);
     glutSpecialFunc(keyboard);
     glutTimerFunc(200, continueMovement, 0);
 

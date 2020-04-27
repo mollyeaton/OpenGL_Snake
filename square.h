@@ -44,6 +44,7 @@ public:
     int getBottomY() const;
 
     point getCenter() const;
+    void setCenter(point p);
 
     std::vector<point> corners;
 };

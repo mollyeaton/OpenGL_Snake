@@ -63,6 +63,10 @@ bool Square::isOverlapping(point &p) {
 
 }
 
+void Square::setCenter(point p) {
+    center = p;
+    resetCorners();
+}
 int Square::getLeftX() const {
     return center.x - (LENGTH / 2);
 }

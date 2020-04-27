@@ -22,13 +22,12 @@ class Square{
 private:
     point center;
     fill color;
-    const unsigned int LENGTH = 5;
-    std::vector<point> corners;
 
     void drawPoint(const point &p) const;
     void resetCorners();
 
 public:
+    static const int LENGTH = 5;
     //constructor
     Square();
     Square(point center, fill color);
@@ -36,6 +35,17 @@ public:
     void draw() const;
 
     void move(double delta_x, double delta_y) ;
+
+    bool isOverlapping(point &p);
+
+    int getLeftX() const;
+    int getRightX() const;
+    int getTopY() const;
+    int getBottomY() const;
+
+    point getCenter() const;
+
+    std::vector<point> corners;
 };
 
 

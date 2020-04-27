@@ -57,3 +57,28 @@ void Square::move(double delta_x, double delta_y) {
     }
 
 }
+bool Square::isOverlapping(point &p) {
+
+    return ((p.x > getLeftX() && p.x < getRightX()) && (p.y > getTopY() && p.y < getBottomY()));
+
+}
+
+int Square::getLeftX() const {
+    return center.x - (LENGTH / 2);
+}
+
+int Square::getRightX() const {
+    return center.x + (LENGTH / 2);
+}
+
+int Square::getTopY() const {
+    return center.y - (LENGTH / 2);
+}
+
+int Square::getBottomY() const {
+    return center.y + (LENGTH / 2);
+}
+
+point Square::getCenter() const {
+    return center;
+}

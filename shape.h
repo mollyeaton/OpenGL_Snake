@@ -66,7 +66,7 @@ public:
     void move(double delta_x, double delta_y);
 
     //check whether a square is overlapping a point
-    virtual bool isOverlapping(point &p) const = 0;
+    bool isOverlapping(point &p) const;
 
     //getters
     int getLeftX() const;

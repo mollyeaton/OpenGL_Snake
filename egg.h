@@ -20,7 +20,7 @@ public:
     //only constructor (needs a point for the center
     explicit Egg (point center);
 
-    explicit Egg (double x, double y);
+    explicit Egg(double x, double y);
 
     //destructor
     virtual ~Egg() = default;
@@ -28,8 +28,6 @@ public:
     //draw function
     void draw() const override;
 
-    //check if egg is overlapping with any part of the snake
-    bool isOverlapping(point &p) const override;
 
 
 

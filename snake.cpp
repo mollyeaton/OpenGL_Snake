@@ -37,8 +37,3 @@ void Snake::draw() const{
 }
 
 
-//check if the head of the snake is overlapping with a point
-bool Snake::isOverlapping(point &p) const {
-    return ((p.x > getLeftX() && p.x < getRightX())
-            && (p.y > getTopY() && p.y < getBottomY()));
-}

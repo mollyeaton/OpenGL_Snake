@@ -30,17 +30,6 @@ public:
     //draw function
     void draw() const override;
 
-    void add(point center);
-
-    point shift(int direction);
-
-
-    int getSize() const;
-
-    bool isOverlapping(point &p) const override;
-
-    std::vector<Snake> getBody() const;
-
 };
 
 

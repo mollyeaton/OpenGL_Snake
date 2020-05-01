@@ -96,3 +96,9 @@ int Shape::getBottomY() const {
 point Shape::getCenter() const {
     return center;
 }
+
+bool Shape::isOverlapping(point &p) const{
+    //check if the egg is overlapping with a point
+    return ((p.x > getLeftX() && p.x < getRightX())
+            && (p.y > getTopY() && p.y < getBottomY()));
+}

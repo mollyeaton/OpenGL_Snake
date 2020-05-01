@@ -19,7 +19,7 @@
 void init();
 
 // Initialize OpenGL Graphics
-void initGL();
+void InitGL();
 
 // Callback functions for GLUT
 
@@ -40,4 +40,14 @@ void timer(int dummy);
 
 // Handle mouse button pressed and released events
 void mouse(int button, int state, int x, int y);
+
+void moveSnake(int d);
+
+void makeFood();
+
+void grid(int r, int c);
+
+void drawGrid();
+
+void reshape(int w, int h);
 #endif /* graphics_h */

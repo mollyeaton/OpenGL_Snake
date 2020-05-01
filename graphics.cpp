@@ -1,262 +1,363 @@
-#include <ctime>
 #include "graphics.h"
-#include "square.h"
-#include <iostream>
+#include <ctime>
+#include <memory>
+#include "shape.h"
+#include "snake.h"
 #include <vector>
+#include "egg.h"
+#include <iostream>
+#include <cstdlib>
 
 #define UP    0
 #define DOWN  1
 #define LEFT  2
 #define RIGHT 3
 
-
 using namespace std;
-
-//bool to represent if food is already on the board
-bool needFood = true;
-//bool if the egg collides with the snake
-bool foodCollides;
-//bool to represent if ghe snake is moving direction
-bool moved = false;
 //set initial direction as down
-int direction = DOWN;
+int direction = UP;
+bool moved = false;
+bool needFood = true;
+bool foodCollides;
+point tempCenter;
 //object for the snake and egg
-vector<Square> snake;
-vector<Square> egg;
+vector<unique_ptr<Shape>> game ;
 
+
+int x,y;
 point eggCenter; //center of the egg
 
-//will hold the width and height of the window
 GLdouble width, height;
+int wd;
+void populateGame(){
+    //populate the egg into the first index
+    game.push_back(make_unique<Egg>(0,0));
+    //start with three blocks to the snake
+    game.push_back(make_unique<Snake>(50,90));
+    game.push_back(make_unique<Snake>(50,70));
+    game.push_back(make_unique<Snake>(50,50));
 
+}
 void init() {
-    width = 500;
-    height = 500;
+    width = 600;
+    height = 600;
+    //seed the random number generator
+    srand(time(NULL));
+    //create the objects for the game
+    populateGame();
+
 }
 
-/* Initialize OpenGL Graphics */
 void initGL() {
-    // Set "clearing" or background color
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
-    glEnable(GL_DEPTH_TEST);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(2.0, 3.0, 6.0,  // eye position
-              0.0, 0.0, 0.0,  // center position (not gaze direction)
-              0.0, 1.0, 0.0); // up vector
-}
-void makeFood(){
-    if (needFood){
-        while(!foodCollides){
-            foodCollides = false;
-            //create coordinates for the food piece and store in a temp variable
-            //pick a random x and y within the window to place the center
-            point tempCenter = {static_cast<double>(rand() % (int)(width - Square::LENGTH)  + Square::LENGTH),
-                                static_cast<double>((rand() % (int)height - Square::LENGTH) + Square::LENGTH) };
-
-            Square temp(tempCenter, {1,1,1});
-
-            //check if it collides with the snake
-            for(int i = 0; i < snake.size(); ++i){
-                for(int j= 0; j < temp.corners.size(); ++j){
-                    if (snake[i].isOverlapping(temp.corners[j])){
-                        foodCollides = true;
-                    }
-                }
-            }
-
-            if(!foodCollides){
-                eggCenter = tempCenter;
-                needFood = false;
-                egg.push_back(Square(eggCenter, {1,1,1}));
-            }
-
-
-        }
-    }
-
-
+    //glMatrixMode(GL_PROJECTION);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void moveSnake(int d){
-    direction = d;
-    point temp, next, back;
-    switch(direction){
-        case UP:
-            if(snake[0].isOverlapping(eggCenter)) {
-                egg.clear();
-                needFood = true;
-                makeFood();
-                temp = snake[0].getCenter();
-                snake[0].move(0, -3);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-                temp = snake[-1].getCenter();
-                moveSnake(UP);
-                snake.push_back(Square(temp, {0,0,1}));
-            }
-            else {
-                needFood = false;
-                temp = snake[0].getCenter();
-                snake[0].move(-3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
 
-            }
-        case DOWN:
-            if(snake[0].isOverlapping(eggCenter)) {
-                egg.clear();
-                needFood = true;
-                makeFood();
-                temp = snake[0].getCenter();
-                snake[0].move(0, 3);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-                temp = snake[-1].getCenter();
-                moveSnake(DOWN);
-                snake.push_back(Square(temp, {0,0,1}));
-            }
-            else {
-                needFood = false;
-                temp = snake[0].getCenter();
-                snake[0].move(-3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-
-            }
-        case RIGHT:
-            if(snake[0].isOverlapping(eggCenter)) {
-                egg.clear();
-                needFood = true;
-                makeFood();
-                temp = snake[0].getCenter();
-                snake[0].move(3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-                temp = snake[-1].getCenter();
-                moveSnake(RIGHT);
-                snake.push_back(Square(temp, {0,0,1}));
-            }
-            else {
-                needFood = false;
-                temp = snake[0].getCenter();
-                snake[0].move(-3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-
-            }
-        case LEFT:
-            if(snake[0].isOverlapping(eggCenter)) {
-                egg.clear();
-                needFood = true;
-                makeFood();
-                temp = snake[0].getCenter();
-                snake[0].move(-3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-                temp = snake[-1].getCenter();
-                moveSnake(LEFT);
-                snake.push_back(Square(temp, {0,0,1}));
-            }
-            else {
-                needFood = false;
-                temp = snake[0].getCenter();
-                snake[0].move(-3, 0);
-                for (int i = 1; i < snake.size(); ++i) {
-                    next = snake[i].getCenter();
-                    snake[i].setCenter(next);
-                }
-
-            }
-    }
-}
-
-void continueMovement(int value){
-    if(!moved){
-        switch (direction){
-            case UP:
-                moveSnake(UP);
-            case DOWN:
-                moveSnake(DOWN);
-            case RIGHT:
-                moveSnake(RIGHT);
-            case LEFT:
-                moveSnake(LEFT);
-        }
-    }
-    else{
-        moved = false;
-    }
-    glutTimerFunc(200, continueMovement, 0);
-}
-/* Handler for window-repaint event. Call back when the window first appears and
- whenever the window needs to be re-painted. */
-void display() {
-
-    // tell OpenGL to use the whole window for drawing
-    glViewport(0, 0, width, height);
+void display(){
+    glViewport(0, 0, width*2, height*2); // DO NOT CHANGE THIS LINE
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-width/2, width/2, -height/2, height/2, -width, width);
+    glOrtho(0.0, width, 0.0, height, -1.f, 1.f);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   // Clear the color buffer with current clearing color
+    // Clear the color buffer with current clearing color
+    glClear(GL_COLOR_BUFFER_BIT); // DO NOT CHANGE THIS LINE
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glColor3f(0.09, 0.38, 0.46);
 
-    glEnable(GL_DEPTH);
-    glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT, GL_FILL);
+    makeFood();
 
-//    for (int i = 0; i < snake.size(); ++i){
-//        snake[i].draw();
-//    }
-//    makeFood();
+    // Draw the game with ~polymorphism~
+    for (unique_ptr<Shape> &g : game) {
+        g->draw();
+    }
 
 
-    glFlush();  // Render now
+    glFlush();
 }
 
-void keyboard(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_UP :
-            if (direction != DOWN && direction != UP) {
-                moved = true;
-                moveSnake(UP);
-            }
-        case GLUT_KEY_RIGHT:
-            if (direction != LEFT && direction != RIGHT) {
-                moved = true;
-                moveSnake(RIGHT);
-            }
+void kbd(unsigned char key, int x, int y){
+    // escape
+    if (key == 27) {
+        glutDestroyWindow(wd);
+        exit(0);
+    }
+
+    glutPostRedisplay();
+}
+
+void kbdS(int key, int x, int y) {
+    switch(key) {
         case GLUT_KEY_DOWN:
             if (direction != UP && direction != DOWN) {
                 moved = true;
                 moveSnake(DOWN);
             }
+            break;
         case GLUT_KEY_LEFT:
             if (direction != RIGHT && direction != LEFT) {
                 moved = true;
                 moveSnake(LEFT);
             }
+            break;
+        case GLUT_KEY_RIGHT:
+            if (direction != LEFT && direction != RIGHT) {
+                moved = true;
+                moveSnake(RIGHT);
+            }
+            break;
+        case GLUT_KEY_UP:
+
+            if (direction != DOWN && direction != UP) {
+                moved = true;
+                moveSnake(UP);
+            }
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void cursor(int x, int y) {
+
+    glutPostRedisplay();
+}
+
+void mouse(int button, int state, int x, int y) {
+
+    glutPostRedisplay();
+}
+
+void timer(int dummy) {
+
+    glutPostRedisplay();
+    glutTimerFunc(100, timer, dummy);
+}
+void moveSnake(int d) {
+    glutPostRedisplay();
+    direction = d;
+    point next, temp;
+    //exit the game if the head runs into the tail
+    for (int i = 5; i < game.size(); ++i){
+        for (int j = 0; j < 2; ++j){
+            if (game[i]->isOverlapping(game[1]->corners[j])){
+                exit(0);
+            }
+        }
+    }
+    switch (direction) {
+        case UP:
+            //check if the head is overlapping with the egg
+            if (game[1]->isOverlapping(eggCenter)) {
+                //clear the current egg and set need food to true
+                needFood = true;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(0, 10);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+
+                //add on a segment to the snake's tail
+                game.push_back(make_unique<Snake>(next.x, next.y));
+                //call the make food function to create a new egg
+                makeFood();
+            }
+            //else the snake is not overlapping with the egg
+            else {
+                needFood = false;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(0, 10);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+            }
+            break;
+        case DOWN:
+            //check if the head is overlapping with the egg
+            if (game[1]->isOverlapping(eggCenter)) {
+                //clear the current egg and set need food to true
+                needFood = true;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(0, -10);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+
+                //add on a segment to the snake's tail
+                game.push_back(make_unique<Snake>(next.x, next.y));
+                //call the make food function to create a new egg
+                makeFood();
+            }
+                //else the snake is not overlapping with the egg
+            else {
+                needFood = false;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(0, -10);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+            }
+            break;
+        case LEFT:
+            //check if the head is overlapping with the egg
+            if (game[1]->isOverlapping(eggCenter)) {
+                //clear the current egg and set need food to true
+                needFood = true;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(-10, 0);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+
+                //add on a segment to the snake's tail
+                game.push_back(make_unique<Snake>(next.x, next.y));
+                //call the make food function to create a new egg
+                makeFood();
+            }
+                //else the snake is not overlapping with the egg
+            else {
+                needFood = false;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(-10, 0);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+            }
+            break;
+        case RIGHT:
+            //check if the head is overlapping with the egg
+            if (game[1]->isOverlapping(eggCenter)) {
+                //clear the current egg and set need food to true
+                needFood = true;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(10, 0);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+
+                //add on a segment to the snake's tail
+                game.push_back(make_unique<Snake>(next.x, next.y));
+                //call the make food function to create a new egg
+                makeFood();
+            }
+                //else the snake is not overlapping with the egg
+            else {
+                needFood = false;
+                //set the next place holder to the head's center
+                next = game[1]->getCenter();
+                //shift the head in the correct direction  by 10
+                game[1]->move(10, 0);
+
+                //loop through the  while storing centers
+                //move each segment to the segment in front's center
+                for (int i = 2; i < game.size(); ++i) {
+                    temp = game[i]->getCenter();
+                    game[i]->setCenter(next);
+                    next = temp;
+                }
+            }
+            break;
         }
     }
 
 
-int main(int argc, char** argv) {
 
+
+void autoMove(int value){
+    glutPostRedisplay();
+    if(!moved){
+        moveSnake(direction);
+    } else {
+        moved = false;
+    }
+
+    glutTimerFunc(100, autoMove, 0);
+}
+
+void makeFood(){
+    if (needFood){
+        foodCollides = true;
+
+        while(foodCollides){
+            foodCollides = false;
+            //create a random coordinate point for the egg within the window
+            x = rand() % (int)(width-Shape::LENGTH) + Shape::LENGTH;
+            y = rand() % (int)(height - Shape::LENGTH) + Shape::LENGTH;
+            //store the points
+            tempCenter = {(double)x,(double)y};
+            //declare a temporary egg
+            Egg temp(tempCenter);
+
+            //check if it collides with the snake
+            //snake is stored in indexes 1 and up
+            for(int i = 1; i < game.size(); ++i){
+                for(int j= 0; j < 4; ++j){
+                    if (temp.isOverlapping(game[i]->corners[j])){
+                        foodCollides = true;
+                    }
+                }
+            }
+        }
+        //exits the loop if it is not colliding
+        eggCenter = tempCenter;
+        needFood = false;
+        //replace the egg with the new coordinates
+        game[0] = make_unique<Egg>(eggCenter.x,eggCenter.y);
+        }
+    }
+
+
+
+int main(int argc, char** argv){
     init();
 
     glutInit(&argc, argv);          // Initialize GLUT
@@ -264,21 +365,32 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_RGBA);
 
     glutInitWindowSize((int)width, (int)height);
-    glutInitWindowPosition(100, 200); // Position the window's initial top-left corner
-    /* create the window and store the handle to it */
-    int wd = glutCreateWindow("Snake Game" /* title */ );
+    glutInitWindowPosition(0, 0); // Position the w
+    wd = glutCreateWindow("Snake Game");
 
-    // Register callback handler for window re-paint event
     glutDisplayFunc(display);
-    //glutKeyboardFunc(kbd);
-    glutSpecialFunc(keyboard);
-    glutTimerFunc(200, continueMovement, 0);
 
-    srand(time(NULL));
-    // Our own OpenGL initialization
     initGL();
+    // register keyboard press event processing function
+    // works for numbers, letters, spacebar, etc.
+    glutKeyboardFunc(kbd);
 
-    // Enter the event-processing loop
+    // register special event: function keys, arrows, etc.
+    glutSpecialFunc(kbdS);
+
+    // handles mouse movement
+    glutPassiveMotionFunc(cursor);
+
+    // handles mouse click
+    glutMouseFunc(mouse);
+
+    // handles timer
+    glutTimerFunc(100, autoMove, 0);
+
+
+
+
     glutMainLoop();
+
     return 0;
 }

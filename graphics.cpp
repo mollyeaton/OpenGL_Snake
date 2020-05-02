@@ -5,7 +5,6 @@
 #include "snake.h"
 #include <vector>
 #include "egg.h"
-#include <iostream>
 #include <cstdlib>
 
 #define UP    0
